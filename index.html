@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./css/bootstrap.css">
+    <link rel="stylesheet" href="./css/style.css">
+    <script src="./js/bootstrap.js"></script>
+    <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous"/>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+    <title>Document</title>
+</head>
+<body>
+
+    <div id="stopwatch" class="position-fixed mt-3 h-100 w-100 d-flex flex-column justify-content-center align-items-center" style=" box-sizing: border-box;">
+        
+        <div class="d-flex p-2 align-items-center justify-content-center">
+            <div style="width:80px; border-radius:100%; overflow: hidden;">
+                <img src="./img/logo.png" alt="" style="width:100%;" >
+            </div>
+            <h2>StopWatch</h2>
+        </div>
+
+        <div class="" style="padding: 10px; ">
+            <div class="d-flex justify-content-center "  style="font-size:10vw;">
+                <div class="digital-font rounded neon-text" style="font-size:10vw; background:#000000;">{{hours}}:{{minutes}}:{{seconds}}</div>
+            </div>
+            <div class=" d-flex justify-content-center p-2 border mt-3">
+                <div class=" rounded p-1 me-2" style="cursor:pointer;" v-on:click="play">
+                    <div class="m-2 fas fa-play neon-text " style="font-size: 20px;"></div>
+                </div>
+                <div class=" rounded p-1 me-2" style="cursor:pointer;" v-on:click="pause">
+                    <div class="m-2 fas fa-pause neon-text" style="font-size: 20px;"></div>
+                </div>
+                <div class="rounded p-1 me-2" style="cursor:pointer;"  v-on:click="stop">
+                    <div class="m-2 fas fa-stop neon-text" style="font-size: 20px;"></div>
+                </div>
+            </div>
+
+            <div class="row  d-flex align-items-center mt-3 flex-nowrap">
+                <div class="col row d-flex flex-row align-items-center justify-content-around">
+                    <a href="https://vuejs.org/" class="col me-2 d-flex align-items-center flex-column justify-content-center align-items-center">
+                        <img src="./img/vuesvg.svg" alt="" style="width:30px; height:30px;">
+                        <h7 class="">VueJS</h7>
+                    </a>
+                    <a href="https://getbootstrap.com/" class=" col me-2 d-flex align-items-center flex-column justify-content-center align-items-center">
+                        <img src="./img/bootstrap.png" alt="" style="width:30px; height:30px;">
+                        <h7 class="">Bootstrap</h7>
+                    </a>
+                    <a href="https://fontawesome.com/" class="col me-2 d-flex align-items-center flex-column justify-content-center align-items-center">
+                        <img src="./img/font_awesome.png" alt="" style="width:30px; height:30px;">
+                        <h7 class="">Wesome</h7>
+                    </a>
+                </div>
+
+                <div class="col d-flex justify-content-center">
+                    <img src="./img/github.png" alt="" style="width: 60px;">
+                </div>
+            </div>
+        </div>
+        
+    </div>
+
+
+    <script>
+        function Timer(hh,mm,ss){
+            this.hours=hh;
+            this.minutes=mm;
+            this.seconds=ss;
+            this.increments60=function(minute_or_second){
+                var s=parseInt(minute_or_second,10)+1;
+                if(s<10)
+                    return "0"+s.toString();
+                else{
+                    if(s>59)
+                        return "00";
+                    else
+                        return s.toString();
+                }
+            }
+            this.incrementHours=function(){
+                var s=parseInt(this.hours,10)+1;
+                if(s<10)
+                    this.hours="0"+s.toString();
+                else{
+                    if(s>99)
+                        this.hours="99";
+                    else    
+                        this.hours=s.toString();
+                }
+            }
+            this.incrementMinutes=function(){
+                this.minutes=this.increments60(this.minutes);
+                if(parseInt(this.minutes)==0){
+                    this.incrementHours();
+                }
+            }
+            this.incrementSecond=function(){
+                this.seconds=this.increments60(this.seconds);
+                if(parseInt(this.seconds)==0)
+                    this.incrementMinutes();
+            }
+        }
+
+
+        Vue.component('stopwatch', { template:'stopwatch'})
+
+        var app=new Vue({
+            el:"#stopwatch",
+            data:{
+                hours:"00",
+                minutes:"00",
+                seconds:"00",
+                timer:null,
+                interval:null,
+                running:false
+            },
+            methods:{
+                play:function(){
+                    this.timer=new Timer(this.hours,this.minutes,this.seconds)
+                    this.running=true;
+                    clearInterval(this.interval)
+                    this.interval= setInterval(()=>{
+                        if(this.running==true){
+                            if(this.timer.hours<99){
+                                this.timer.incrementSecond()
+                                this.seconds=this.timer.seconds
+                                this.minutes=this.timer.minutes
+                                this.hours=this.timer.hours
+                            }
+                            else{
+                                if(this.timer.hours==99 && this.timer.minutes<59){
+                                    this.timer.incrementSecond()
+                                    this.seconds=this.timer.seconds
+                                    this.minutes=this.timer.minutes
+                                }
+                                else{
+                                    if(this.timer.minutes==59 && this.timer.seconds<59){
+                                        this.timer.incrementSecond()
+                                        this.seconds=this.timer.seconds
+                                    }
+                                }
+                            }
+                        }
+                    },1000)
+                },
+                pause:function(){
+                    this.running==false
+                    clearInterval(this.interval)
+                },
+                stop:function(){
+                    this.hours="00"
+                    this.minutes="00"
+                    this.seconds="00"
+                    this.running==false
+                    clearInterval(this.interval)
+                }
+            },
+            mounted(){
+                this.play()
+            }
+        });
+
+    </script>
+</body>
+</html>
